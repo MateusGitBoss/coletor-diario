@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><body>
+<div class="container" id="conteudo"></div>
+<script>
+  var data = [
+    {"text": "“A day without sunshine is like, you know, night.”", "author": "Steve Martin", "tags": ["humor"]},
+    {"text": "“Try not to become a man of success.”", "author": "Albert Einstein", "tags": ["success"]}
+  ];
+  setTimeout(function () {
+    var html = data.map(function (q) {
+      return '<div class="quote"><span class="text">' + q.text + '</span>' +
+        '<span>by <small class="author">' + q.author + '</small></span>' +
+        '<div class="tags">' + q.tags.map(function (t) { return '<a class="tag">' + t + '</a>'; }).join(' ') + '</div></div>';
+    }).join('');
+    html += '<ul class="pager"><li class="next"><a href="/js/page/2/">Next</a></li></ul>';
+    document.getElementById('conteudo').innerHTML = html;
+  }, 50);
+</script>
+</body></html>

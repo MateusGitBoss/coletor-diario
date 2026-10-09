@@ -25,9 +25,18 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked
+      - name: Navegador do Playwright
+        run: uv run playwright install --with-deps chromium
       - name: Lint
         run: uv run ruff check . && uv run ruff format --check .
       - name: Tipos
         run: uv run mypy
       - name: Testes
         run: uv run pytest
+
+  imagem:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build da imagem Docker
+        run: docker build -t coletor-diario .
