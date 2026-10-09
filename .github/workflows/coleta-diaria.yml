@@ -1,0 +1,62 @@
+name: Coleta diária
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 06:00 em Brasília (o cron do GitHub usa UTC e pode atrasar alguns minutos)
+  workflow_dispatch:
+
+concurrency: coleta-diaria # nunca duas coletas ao mesmo tempo
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Banco local descartável: usado só quando o segredo DATABASE_URL (Supabase) não existe
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: coletor
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/coletor' }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --locked --no-dev
+      - run: uv run playwright install --with-deps chromium
+
+      - name: Coletar
+        run: uv run coletor executar --todas --relatorio relatorio.json
+
+      - name: Histórico recente
+        if: always()
+        run: uv run coletor execucoes --ultimas 10
+
+      - name: Resumo da execução
+        if: always()
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          arquivo = pathlib.Path("relatorio.json")
+          print("| Fonte | Status | Itens | Inválidos | Motivo |\n|---|---|---|---|---|")
+          for r in json.loads(arquivo.read_text()) if arquivo.exists() else []:
+              print(f"| {r['fonte']} | {r['status']} | {r['itens_coletados']} | {r['itens_invalidos']} | {r['mensagem'] or ''} |")
+          PY
+
+      - name: Guardar relatório e evidências de falha
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: coleta-${{ github.run_id }}
+          path: |
+            relatorio.json
+            artefatos/
+          if-no-files-found: ignore
+          retention-days: 14
