@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>coletor-diario · demonstração</title>
+<meta name="description" content="Demonstração do coletor-diario: robô que coleta dados de sites todo dia e percebe quando a coleta 'deu certo' mas veio errada.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--txt:#1b1f24;--mut:#5b6573;--borda:#dde1e6;--acento:#6f42c1;--ok:#1a7f37;--alerta:#9a6700;--erro:#cf222e;--cinza:#eef1f4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--borda)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header .wrap{padding-top:20px;padding-bottom:16px}
+h1{font-size:22px;margin:0 0 4px}
+h2{font-size:17px;margin:0 0 10px}
+h3{font-size:15px;margin:0 0 6px}
+p{margin:0 0 10px}
+a{color:#0969da}
+.sub{color:var(--mut);margin:0}
+.aviso{background:#fff8c5;border:1px solid #e6d27a;border-radius:8px;padding:8px 12px;margin-top:12px;font-size:14px}
+.nav{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:14px}
+main{padding:18px 0 40px}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:16px;margin-bottom:16px;min-width:0}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:900px){.grid.duas{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 3px}
+input,select{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--borda);border-radius:6px;background:#fff;color:var(--txt)}
+.linha{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.presets button{font:inherit;font-size:13px;cursor:pointer;border-radius:999px;border:1px solid var(--borda);background:#fff;padding:4px 10px;color:var(--txt)}
+.presets button[aria-pressed=true]{background:var(--txt);color:#fff;border-color:var(--txt)}
+.resultado{border-radius:10px;padding:14px;margin-top:4px}
+.resultado b{font-size:20px;display:block;text-transform:uppercase;letter-spacing:.03em}
+.r-sucesso{background:#dafbe1;color:#0f5323}.r-parcial{background:#fff8c5;color:#6b4a00}.r-falha{background:#ffebe9;color:#8a1219}
+.grafico{display:flex;align-items:flex-end;gap:6px;height:170px;position:relative;margin:18px 0 6px;padding-top:10px;border-bottom:1px solid var(--borda)}
+.barra{flex:1;background:#c8b6ef;border-radius:4px 4px 0 0;position:relative;min-width:14px}
+.barra.hoje{background:var(--acento)}
+.barra span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--mut)}
+.limite{position:absolute;left:0;right:0;border-top:2px dashed var(--erro)}
+.limite small{position:absolute;right:0;top:-18px;font-size:11px;color:var(--erro);background:var(--card);padding:0 4px}
+.legenda{display:flex;justify-content:space-between;font-size:11.5px;color:var(--mut)}
+.fluxo{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));counter-reset:p}
+.etapa{background:var(--cinza);border-radius:8px;padding:10px 12px;font-size:14px}
+.etapa b{display:block}
+.etapa b::before{counter-increment:p;content:counter(p) ". ";color:var(--acento)}
+.tabela{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--borda);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12.5px;white-space:nowrap}
+td.num,th.num{text-align:right;white-space:nowrap}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600;background:var(--cinza);white-space:nowrap}
+.t-ok{background:#dafbe1;color:var(--ok)}.t-alerta{background:#fff8c5;color:var(--alerta)}.t-erro{background:#ffebe9;color:var(--erro)}
+.pagina{border:1px solid var(--borda);border-radius:8px;padding:12px;margin-bottom:10px}
+.pagina .cab{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:6px}
+.erro{color:var(--erro);font-size:13.5px;margin:4px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;background:var(--cinza);padding:1px 4px;border-radius:4px}
+.vazio{color:var(--mut);font-style:italic}
+footer{color:var(--mut);font-size:13px;padding:0 0 30px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>🤖 coletor-diario</h1>
+  <p class="sub">Robô que coleta dados de dois sites todo dia às 6h, guarda no PostgreSQL, registra cada execução e avisa no Discord quando algo dá errado, inclusive quando "dá certo" mas traz bem menos dados que o normal.</p>
+  <div class="aviso"><b>Demonstração.</b> Esta página não acessa os sites nem o banco. A extração abaixo foi feita pelo código Python de verdade sobre páginas salvas (as mesmas dos testes automáticos). A regra de anomalia é uma cópia em JavaScript, conferida contra o Python ao abrir a página.</div>
+  <nav class="nav"><a href="https://github.com/MateusGitBoss/coletor-diario">Código no GitHub</a><a href="#anomalia">Simulador de anomalia</a><a href="#extracao">Extração</a><a href="#fluxo">Como funciona</a><a href="#conferencia">Conferência</a></nav>
+</div></header>
+
+<main class="wrap">
+<section class="card" id="anomalia">
+  <h2>O robô "deu certo". Mas veio certo?</h2>
+  <p>Se o site muda o HTML, o robô não quebra: ele roda até o fim e traz 3 itens em vez de 1.000. Sem uma regra olhando o volume, ninguém percebe. Teste a regra com um cenário pronto ou mexa nos números.</p>
+  <div class="presets" id="presets"></div>
+  <div class="grid duas">
+    <div>
+      <div class="linha">
+        <div><label for="validos">Itens válidos hoje</label><input id="validos" type="number" min="0" inputmode="numeric"></div>
+        <div><label for="invalidos">Itens inválidos hoje</label><input id="invalidos" type="number" min="0" inputmode="numeric"></div>
+      </div>
+      <label for="historico">Válidos nas últimas execuções bem-sucedidas (separados por vírgula)</label>
+      <input id="historico" inputmode="numeric">
+      <p class="sub" style="font-size:13px;margin-top:8px">Regras: nenhum válido = <b>falha</b>; mais de 10% inválidos = <b>parcial</b>; menos de 3 execuções no histórico = aceita e vai formando a base; abaixo de 50% da média = <b>parcial</b>. Parcial e falha mandam aviso no Discord.</p>
+    </div>
+    <div>
+      <div class="resultado" id="resultado"></div>
+      <div class="grafico" id="grafico"></div>
+      <div class="legenda"><span>execuções anteriores</span><span>hoje</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="card" id="extracao">
+  <h2>Extração das páginas</h2>
+  <p>Cada item extraído passa por validação (Pydantic) antes de ir para o banco. Item com campo faltando é contado como inválido, com o motivo, e entra na conta dos 10%.</p>
+  <div id="paginas"></div>
+</section>
+
+<section class="card" id="fluxo">
+  <h2>Como funciona</h2>
+  <div class="fluxo">
+    <div class="etapa"><b>Agenda</b>GitHub Actions dispara <code>coletor executar --todas</code> todo dia às 06:00.</div>
+    <div class="etapa"><b>Coleta</b>Livros com <code>httpx</code> (página estática). Citações com Playwright, porque o texto só aparece depois do JavaScript.</div>
+    <div class="etapa"><b>Validação</b>Pydantic confere cada item. Com erro de rede, tenta de novo com espera crescente.</div>
+    <div class="etapa"><b>Gravação</b>PostgreSQL: itens, histórico de preço e uma linha por execução (status, tempo, motivo).</div>
+    <div class="etapa"><b>Anomalia</b>Compara o volume de hoje com a média recente (simulador acima).</div>
+    <div class="etapa"><b>Alerta</b>Parcial ou falha vira mensagem no Discord, com print da tela quando foi o navegador que falhou.</div>
+  </div>
+  <p class="sub" style="margin-top:12px">Uma API somente leitura (FastAPI) entrega as execuções para o <a href="https://github.com/MateusGitBoss/Painel-operacao">Painel de operação</a>.</p>
+</section>
+
+<section class="card" id="conferencia">
+  <h2>Conferência contra o Python</h2>
+  <p class="sub"><code>scripts/gerar_dados_web.py</code> roda <code>avaliar_volume</code> do Python em <span id="nCasos"></span> cenários e grava as respostas. A cópia em JavaScript desta página precisa dar o mesmo status e a mesma mensagem:</p>
+  <div class="tabela"><table><thead><tr><th>Cenário</th><th>Python</th><th>Esta página</th><th></th></tr></thead><tbody id="tabConferencia"></tbody></table></div>
+</section>
+</main>
+<footer class="wrap">Projeto de portfólio de Mateus. Código: Python, httpx, Playwright, Pydantic, PostgreSQL, FastAPI, GitHub Actions, pytest.</footer>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// Cópia de coletor/anomalia.py (avaliar_volume) com os parâmetros padrão
+function arredondaPar(x){ // f"{x:.0f}" do Python arredonda .5 para o par
+  const piso = Math.floor(x), resto = x - piso;
+  if (resto > 0.5) return piso + 1;
+  if (resto < 0.5) return piso;
+  return piso % 2 === 0 ? piso : piso + 1;
+}
+function avaliarVolume(validos, historico, invalidos = 0){
+  const limiar = 0.5, minimoHistorico = 3, maxInvalidos = 0.1;
+  if (validos === 0) return {status: "falha", motivo: "nenhum item válido coletado"};
+  const total = validos + invalidos;
+  if (invalidos / total > maxInvalidos)
+    return {status: "parcial", motivo: `${invalidos} de ${total} itens inválidos (acima de 10%): o HTML do site pode ter mudado`};
+  if (historico.length < minimoHistorico) return {status: "sucesso", motivo: null};
+  const media = historico.reduce((a, b) => a + b, 0) / historico.length;
+  if (validos < limiar * media)
+    return {status: "parcial", motivo: `coletou ${validos} itens, abaixo de 50% da média recente (${arredondaPar(media)})`};
+  return {status: "sucesso", motivo: null};
+}
+
+let D;
+function ler(){
+  const n = id => Math.max(0, parseInt($(id).value, 10) || 0);
+  const historico = $("historico").value.split(/[,;\s]+/).map(x => parseInt(x, 10)).filter(x => Number.isFinite(x) && x >= 0);
+  return {validos: n("validos"), invalidos: n("invalidos"), historico};
+}
+function atualizar(){
+  const e = ler();
+  const r = avaliarVolume(e.validos, e.historico, e.invalidos);
+  const textos = {sucesso: "Execução normal. Grava e não incomoda ninguém.", parcial: "Grava o que veio, marca como suspeita e avisa no Discord.", falha: "Nada para gravar. Avisa no Discord (com print, se foi o navegador)."};
+  $("resultado").className = "resultado r-" + r.status;
+  $("resultado").innerHTML = `<b>${r.status}</b>${esc(r.motivo || "dentro do normal")}<div style="font-size:13px;margin-top:4px">${textos[r.status]}</div>`;
+  const valores = [...e.historico, e.validos];
+  const max = Math.max(...valores, 1);
+  const media = e.historico.length ? e.historico.reduce((a, b) => a + b, 0) / e.historico.length : null;
+  let html = valores.map((v, i) => `<div class="barra${i === valores.length - 1 ? " hoje" : ""}" style="height:${Math.max(2, 150 * v / max)}px"><span>${v}</span></div>`).join("");
+  if (media !== null && e.historico.length >= 3)
+    html += `<div class="limite" style="bottom:${150 * 0.5 * media / max}px"><small>50% da média</small></div>`;
+  $("grafico").innerHTML = html;
+}
+function aplicar(i){
+  const c = D.casos_anomalia[i];
+  $("validos").value = c.validos; $("invalidos").value = c.invalidos; $("historico").value = c.historico.join(", ");
+  document.querySelectorAll("#presets button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+  atualizar();
+}
+function paginas(){
+  $("paginas").innerHTML = D.paginas.map(p => {
+    const nInv = p.extraidos - p.validos.length;
+    const situacao = p.validos.length === 0 ? '<span class="tag t-erro">0 itens: viraria falha</span>'
+      : nInv ? `<span class="tag t-alerta">${p.validos.length} de ${p.extraidos} válidos</span>` : `<span class="tag t-ok">${p.validos.length} de ${p.extraidos} válidos</span>`;
+    const ehLivro = p.fonte === "livros";
+    const linhas = p.validos.map(it => ehLivro
+      ? `<tr><td>${esc(it.titulo)}</td><td class="num">£ ${(it.preco_centavos/100).toFixed(2).replace(".", ",")}</td><td>${it.em_estoque ? "sim" : "não"}</td><td>${"★".repeat(it.dados.estrelas)}</td></tr>`
+      : `<tr><td>“${esc(it.titulo)}”</td><td>${esc(it.dados.autor)}</td><td>${it.dados.tags.map(t => `<span class="tag">${esc(t)}</span>`).join(" ")}</td></tr>`).join("");
+    const cab = ehLivro ? "<th>Título</th><th class='num'>Preço</th><th>Estoque</th><th>Nota</th>" : "<th>Citação</th><th>Autor</th><th>Tags</th>";
+    const descricao = {
+      "tests/fixtures/livros_pagina1.html": "Primeira página de livros, com um item propositalmente quebrado (sem link).",
+      "tests/fixtures/livros_ultima.html": "Última página: não tem botão “próxima”, o robô para aqui.",
+      "tests/fixtures/quebrado/index.html": "Simula o site depois de mudar o HTML: nenhum livro reconhecido.",
+      "tests/fixtures/citacoes_renderizada.html": "Página de citações já com o JavaScript executado pelo navegador.",
+    }[p.arquivo] || "";
+    return `<div class="pagina"><div class="cab"><h3>${esc(p.fonte)} · <code>${esc(p.arquivo.replace("tests/fixtures/", ""))}</code></h3>${situacao}</div>
+      <p class="sub" style="font-size:13.5px">${descricao}</p>
+      ${p.erros.map(e => `<p class="erro">Inválido: ${esc(e)}</p>`).join("")}
+      ${linhas ? `<div class="tabela"><table><thead><tr>${cab}</tr></thead><tbody>${linhas}</tbody></table></div>` : '<p class="vazio">Nenhum item extraído.</p>'}</div>`;
+  }).join("");
+}
+function conferir(){
+  $("nCasos").textContent = D.casos_anomalia.length;
+  $("tabConferencia").innerHTML = D.casos_anomalia.map(c => {
+    const js = avaliarVolume(c.validos, c.historico, c.invalidos);
+    const igual = js.status === c.status && js.motivo === c.motivo;
+    const fmt = r => `<span class="tag ${{sucesso:"t-ok", parcial:"t-alerta", falha:"t-erro"}[r.status]}">${r.status}</span>${r.motivo ? `<div class="sub" style="font-size:12.5px">${esc(r.motivo)}</div>` : ""}`;
+    return `<tr><td>${esc(c.nome)}</td><td>${fmt(c)}</td><td>${fmt(js)}</td><td>${igual ? "✅" : "❌"}</td></tr>`;
+  }).join("");
+}
+async function iniciar(){
+  D = await (await fetch("dados/demo.json")).json();
+  $("presets").innerHTML = D.casos_anomalia.map((c, i) => `<button type="button" data-i="${i}">${esc(c.nome)}</button>`).join("");
+  $("presets").addEventListener("click", e => { const b = e.target.closest("button"); if (b) aplicar(Number(b.dataset.i)); });
+  ["validos", "invalidos", "historico"].forEach(id => $(id).addEventListener("input", () => {
+    document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-pressed", "false")); atualizar();
+  }));
+  aplicar(1);
+  paginas();
+  conferir();
+}
+iniciar();
+</script>
+</body>
+</html>
