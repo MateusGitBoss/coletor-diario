@@ -1,0 +1,240 @@
+{
+ "paginas": [
+  {
+   "fonte": "livros",
+   "arquivo": "tests/fixtures/livros_pagina1.html",
+   "extraidos": 3,
+   "validos": [
+    {
+     "id_externo": "a-light-in-the-attic_1000",
+     "titulo": "A Light in the Attic",
+     "url": "https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html",
+     "preco_centavos": 5177,
+     "em_estoque": true,
+     "dados": {
+      "moeda": "GBP",
+      "estrelas": 3
+     }
+    },
+    {
+     "id_externo": "tipping-the-velvet_999",
+     "titulo": "Tipping the Velvet",
+     "url": "https://books.toscrape.com/catalogue/tipping-the-velvet_999/index.html",
+     "preco_centavos": 5374,
+     "em_estoque": true,
+     "dados": {
+      "moeda": "GBP",
+      "estrelas": 1
+     }
+    }
+   ],
+   "erros": [
+    "?: campos inválidos (id_externo, url)"
+   ]
+  },
+  {
+   "fonte": "livros",
+   "arquivo": "tests/fixtures/livros_ultima.html",
+   "extraidos": 1,
+   "validos": [
+    {
+     "id_externo": "1000-places-to-see-before-you-die_1",
+     "titulo": "1,000 Places to See Before You Die",
+     "url": "https://books.toscrape.com/catalogue/1000-places-to-see-before-you-die_1/index.html",
+     "preco_centavos": 2608,
+     "em_estoque": true,
+     "dados": {
+      "moeda": "GBP",
+      "estrelas": 2
+     }
+    }
+   ],
+   "erros": []
+  },
+  {
+   "fonte": "livros",
+   "arquivo": "tests/fixtures/quebrado/index.html",
+   "extraidos": 0,
+   "validos": [],
+   "erros": []
+  },
+  {
+   "fonte": "citacoes",
+   "arquivo": "tests/fixtures/citacoes_renderizada.html",
+   "extraidos": 2,
+   "validos": [
+    {
+     "id_externo": "f492133a76028e27",
+     "titulo": "The world as we have created it is a process of our thinking. It cannot be changed without changing our thinking.",
+     "url": "https://quotes.toscrape.com/js/",
+     "preco_centavos": null,
+     "em_estoque": null,
+     "dados": {
+      "autor": "Albert Einstein",
+      "tags": [
+       "change",
+       "deep-thoughts",
+       "thinking"
+      ]
+     }
+    },
+    {
+     "id_externo": "b7b9ef4946a0a14e",
+     "titulo": "It is our choices, Harry, that show what we truly are, far more than our abilities.",
+     "url": "https://quotes.toscrape.com/js/",
+     "preco_centavos": null,
+     "em_estoque": null,
+     "dados": {
+      "autor": "J.K. Rowling",
+      "tags": [
+       "abilities",
+       "choices"
+      ]
+     }
+    }
+   ],
+   "erros": []
+  }
+ ],
+ "casos_anomalia": [
+  {
+   "nome": "Dia normal",
+   "validos": 1000,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000,
+    998,
+    1000,
+    1000,
+    1000,
+    1000
+   ],
+   "status": "sucesso",
+   "motivo": null
+  },
+  {
+   "nome": "Site mudou o HTML",
+   "validos": 3,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000,
+    998,
+    1000,
+    1000,
+    1000,
+    1000
+   ],
+   "status": "parcial",
+   "motivo": "coletou 3 itens, abaixo de 50% da média recente (1000)"
+  },
+  {
+   "nome": "Muitos itens inválidos",
+   "validos": 900,
+   "invalidos": 120,
+   "historico": [
+    1000,
+    1000,
+    998,
+    1000,
+    1000,
+    1000,
+    1000
+   ],
+   "status": "parcial",
+   "motivo": "120 de 1020 itens inválidos (acima de 10%): o HTML do site pode ter mudado"
+  },
+  {
+   "nome": "Site fora do ar",
+   "validos": 0,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000,
+    998,
+    1000,
+    1000,
+    1000,
+    1000
+   ],
+   "status": "falha",
+   "motivo": "nenhum item válido coletado"
+  },
+  {
+   "nome": "Primeiras execuções",
+   "validos": 40,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000
+   ],
+   "status": "sucesso",
+   "motivo": null
+  },
+  {
+   "nome": "Queda moderada",
+   "validos": 600,
+   "invalidos": 10,
+   "historico": [
+    1000,
+    1000,
+    998,
+    1000,
+    1000,
+    1000,
+    1000
+   ],
+   "status": "sucesso",
+   "motivo": null
+  },
+  {
+   "nome": "Exatamente metade",
+   "validos": 500,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000,
+    1000
+   ],
+   "status": "sucesso",
+   "motivo": null
+  },
+  {
+   "nome": "Pouco abaixo da metade",
+   "validos": 499,
+   "invalidos": 0,
+   "historico": [
+    1000,
+    1000,
+    1000
+   ],
+   "status": "parcial",
+   "motivo": "coletou 499 itens, abaixo de 50% da média recente (1000)"
+  },
+  {
+   "nome": "10% inválidos",
+   "validos": 90,
+   "invalidos": 10,
+   "historico": [
+    100,
+    100,
+    100
+   ],
+   "status": "sucesso",
+   "motivo": null
+  },
+  {
+   "nome": "11% inválidos",
+   "validos": 89,
+   "invalidos": 11,
+   "historico": [
+    100,
+    100,
+    100
+   ],
+   "status": "parcial",
+   "motivo": "11 de 100 itens inválidos (acima de 10%): o HTML do site pode ter mudado"
+  }
+ ]
+}

@@ -50,6 +50,15 @@ erDiagram
 
 As migrações ficam em [`src/coletor/migrations`](src/coletor/migrations) e são aplicadas em ordem, uma vez cada. Consultas prontas para investigar problemas estão em [`docs/consultas.sql`](docs/consultas.sql).
 
+## Demonstração no navegador
+
+A pasta `web/` tem uma página estática com um simulador da regra de anomalia (`avaliar_volume`) e o resultado da extração sobre as páginas salvas dos testes. A regra é uma cópia em JavaScript, conferida contra o Python em 10 cenários ao abrir a página. Para regerar os dados:
+
+```bash
+uv run python scripts/gerar_dados_web.py   # regrava web/dados/demo.json
+python -m http.server -d web 8000          # abre em http://localhost:8000
+```
+
 ## Como rodar
 
 Pré-requisitos: Python 3.12, [uv](https://docs.astral.sh/uv/) e Docker.
