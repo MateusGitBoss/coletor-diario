@@ -3,6 +3,8 @@
 [![CI](https://github.com/MateusGitBoss/coletor-diario/actions/workflows/ci.yml/badge.svg)](https://github.com/MateusGitBoss/coletor-diario/actions/workflows/ci.yml)
 [![Coleta diária](https://github.com/MateusGitBoss/coletor-diario/actions/workflows/coleta-diaria.yml/badge.svg)](https://github.com/MateusGitBoss/coletor-diario/actions/workflows/coleta-diaria.yml)
 
+**Demonstração online:** https://coletor-diario.vercel.app
+
 Robô que coleta dados de sites todos os dias, guarda tudo no PostgreSQL, registra cada execução e avisa no Discord quando algo dá errado, inclusive quando "dá certo" mas traz bem menos dados que o normal.
 
 **Explicação para quem não é da área:** todo dia às 6h um robô abre dois sites sozinho, copia as informações (livros com preço e estoque, e citações), guarda numa base de dados organizada e manda mensagem no Discord se o site saiu do ar, mudou de formato ou trouxe menos coisa que de costume. Quem precisa investigar tem o histórico de cada execução, o motivo da falha e um print da tela no momento do erro.
@@ -138,7 +140,7 @@ Cada execução deixa um resumo na página do workflow e, se falhar, um artefato
 
 ## Como este projeto foi construído
 
-Construído com o Claude Code como ferramenta de desenvolvimento, com cada mudança entrando por pull request revisado. O roteiro de estudo em [`docs/ENTREVISTA.md`](docs/ENTREVISTA.md) explica cada decisão.
+Construído com o Claude Code como ferramenta de desenvolvimento, com cada mudança entrando por pull request revisado.
 
 ## Licença
 
