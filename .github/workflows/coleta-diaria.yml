@@ -9,7 +9,7 @@ concurrency: coleta-diaria # nunca duas coletas ao mesmo tempo
 
 jobs:
   coletar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     # Banco local descartável: usado só quando o segredo DATABASE_URL (Supabase) não existe
     services:
